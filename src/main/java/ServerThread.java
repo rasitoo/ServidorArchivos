@@ -1,37 +1,52 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Rodrigo
  * @date 18 febrero, 2025
  */
 class ServerThread implements Runnable {
-    private Socket clientSocket;
+    private final Socket clientSocket;
+    private final AtomicInteger clientCount;
 
-    public ServerThread(Socket socket) {
+    public ServerThread(Socket socket, AtomicInteger clientCount) {
         this.clientSocket = socket;
+        this.clientCount = clientCount;
     }
 
     @Override
     public void run() {
+
         try (DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
              DataOutputStream dos = new DataOutputStream(clientSocket.getOutputStream())) {
-
-            String command = dis.readUTF();
-            if (command.equals("UPLOAD")) {
-                receiveFile(dis);
-            } else if (command.equals("DOWNLOAD")) {
-                listFiles(dos);
-                sendFile(dis, dos);
-            }else {
-                System.out.println("Se ha recibido un comando desconocido");
+            dos.writeUTF("Bienvenido al servidor");
+            while (true) {
+                String command = dis.readUTF();
+                if (command.equals("UPLOAD")) {
+                    receiveFile(dis);
+                } else if (command.equals("DOWNLOAD")) {
+                    listFiles(dos);
+                    sendFile(dis, dos);
+                } else {
+                    System.out.println("Se ha recibido un comando desconocido");
+                }
             }
+
         } catch (FileNotFoundException e) {
             System.err.println("Error: Archivo no encontrado - " + e.getMessage());
         } catch (IOException e) {
             System.err.println("Error de IO: " + e.getMessage());
         } catch (Exception e) {
             System.err.println("Error general: " + e.getMessage());
+        } finally {
+            try {
+                clientSocket.close();
+                clientCount.decrementAndGet();
+                System.out.println("Un cliente se ha desconectado, actualmente hay: " + clientCount.get() + " clientes conectados.");
+            } catch (IOException e) {
+                System.err.println("Error al cerrar el socket: " + e.getMessage());
+            }
         }
     }
 
@@ -53,6 +68,7 @@ class ServerThread implements Runnable {
         }
         System.out.println("Archivo " + fileName + " recibido.");
     }
+
     private void listFiles(DataOutputStream dos) throws IOException {
         File dir = new File("./server_files");
         File[] files = dir.listFiles();
@@ -64,6 +80,7 @@ class ServerThread implements Runnable {
         } else {
             dos.writeInt(0);
         }
+
     }
 
     private void sendFile(DataInputStream dis, DataOutputStream dos) throws IOException {

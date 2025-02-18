@@ -16,6 +16,11 @@ public class Client {
              DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
              BufferedReader console = new BufferedReader(new InputStreamReader(System.in))) {
 
+            String serverMessage = dis.readUTF();
+            if ("SERVER_FULL".equals(serverMessage)) {
+                System.out.println("El servidor está lleno. Inténtelo de nuevo más tarde.");
+                return;
+            }
             System.out.println("Conectado al servidor");
 
             while (true) {
@@ -26,15 +31,15 @@ public class Client {
                     break;
                 }
 
-                dos.writeUTF(command);
-
                 if (command.equals("UPLOAD")) {
+                    dos.writeUTF(command);
                     System.out.print("Ingrese la ruta del archivo a subir: ");
                     String filePath = console.readLine();
                     String fileName = new File(filePath).getName();
                     dos.writeUTF(fileName);
                     sendFile(filePath, dos);
                 } else if (command.equals("DOWNLOAD")) {
+                    dos.writeUTF(command);
                     listFiles(dis);
                     System.out.print("Ingrese el nombre del archivo a descargar: ");
                     String fileName = console.readLine();
@@ -82,8 +87,11 @@ public class Client {
             return;
         }
         long fileSize = dis.readLong();
-        File dir = new File(".\\client_files\\" + fileName);
-        try (FileOutputStream fos = new FileOutputStream(dir)) {
+        File file = new File(".\\client_files\\" + fileName);
+        if (!file.exists()) {
+            file.getParentFile().mkdirs(); // Crear directorios si no existen
+        }
+        try (FileOutputStream fos = new FileOutputStream(file)) {
             byte[] buffer = new byte[4096];
             int bytesRead;
             while (fileSize > 0 && (bytesRead = dis.read(buffer, 0, (int) Math.min(buffer.length, fileSize))) != -1) {
