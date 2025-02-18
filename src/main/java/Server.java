@@ -1,8 +1,3 @@
-/**
- * @author Rodrigo
- * @date 18 febrero, 2025
- */
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -11,11 +6,23 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Clase principal del servidor que acepta conexiones de clientes.
+ * Utiliza un pool de hilos para manejar múltiples clientes.
+ *
+ * @author Rodrigo
+ * @date 18 febrero, 2025
+ */
 public class Server {
     private static final int PORT = 12345;
     private static final int MAX_CLIENTS = 10;
     private static final AtomicInteger clientCount = new AtomicInteger(0);
 
+    /**
+     * Método principal que inicia el servidor.
+     *
+     * @param args Argumentos de la línea de comandos.
+     */
     public static void main(String[] args) {
         ExecutorService pool = Executors.newFixedThreadPool(MAX_CLIENTS);
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {

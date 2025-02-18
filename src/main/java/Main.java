@@ -1,16 +1,19 @@
-/**
- * @author Rodrigo
- * @date 18 febrero, 2025
- */
-import java.io.IOException;
-import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Clase principal que crea múltiples clientes para probar el servidor.
+ *
+ * @author Rodrigo
+ * @date 18 febrero, 2025
+ */
 public class Main {
+    /**
+     * Método principal que crea 10 clientes falsos para probar el servidor.
+     *
+     * @param args Argumentos de la línea de comandos.
+     */
     public static void main(String[] args) {
-
-        //Este main se encarga de crear 10 falsos clientes para comprobar que funciona correctamente el manejo de límites del servidor
         ExecutorService clientPool = Executors.newFixedThreadPool(10);
         for (int i = 0; i < 10; i++) {
             clientPool.execute(() -> {

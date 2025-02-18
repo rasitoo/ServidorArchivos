@@ -3,6 +3,9 @@ import java.net.Socket;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * Clase que maneja la comunicación con un cliente en un hilo separado.
+ * Implementa la interfaz Runnable.
+ *
  * @author Rodrigo
  * @date 18 febrero, 2025
  */
@@ -10,11 +13,21 @@ class ServerThread implements Runnable {
     private final Socket clientSocket;
     private final AtomicInteger clientCount;
 
+    /**
+     * Constructor de la clase ServerThread.
+     *
+     * @param socket El socket del cliente.
+     * @param clientCount El contador atómico de clientes conectados, al ser atómico permite estar conectado con el valor hilo del servidor sin peligros de concurrencia.
+     */
     public ServerThread(Socket socket, AtomicInteger clientCount) {
         this.clientSocket = socket;
         this.clientCount = clientCount;
     }
 
+    /**
+     * Método que se ejecuta cuando el hilo comienza.
+     * Maneja la comunicación con el cliente.
+     */
     @Override
     public void run() {
 
@@ -50,6 +63,12 @@ class ServerThread implements Runnable {
         }
     }
 
+    /**
+     * Método que recibe un archivo del cliente.
+     *
+     * @param dis El DataInputStream para leer datos del cliente.
+     * @throws IOException Si ocurre un error de entrada/salida.
+     */
     private void receiveFile(DataInputStream dis) throws IOException {
 
         String fileName = dis.readUTF();
@@ -69,6 +88,12 @@ class ServerThread implements Runnable {
         System.out.println("Archivo " + fileName + " recibido.");
     }
 
+    /**
+     * Método que lista los archivos disponibles en el servidor.
+     *
+     * @param dos El DataOutputStream para enviar datos al cliente.
+     * @throws IOException Si ocurre un error de entrada/salida.
+     */
     private void listFiles(DataOutputStream dos) throws IOException {
         File dir = new File("./server_files");
         File[] files = dir.listFiles();
@@ -80,9 +105,15 @@ class ServerThread implements Runnable {
         } else {
             dos.writeInt(0);
         }
-
     }
 
+    /**
+     * Método que envía un archivo al cliente.
+     *
+     * @param dis El DataInputStream para leer datos del cliente.
+     * @param dos El DataOutputStream para enviar datos al cliente.
+     * @throws IOException Si ocurre un error de entrada/salida.
+     */
     private void sendFile(DataInputStream dis, DataOutputStream dos) throws IOException {
         String fileName = dis.readUTF();
         File file = new File("./server_files/" + fileName);

@@ -1,15 +1,22 @@
-/**
- * @author Rodrigo
- * @date 18 febrero, 2025
- */
-
 import java.io.*;
 import java.net.Socket;
 
+/**
+ * Clase que representa un cliente que se conecta al servidor.
+ * Permite subir y descargar archivos del servidor.
+ *
+ * @author Rodrigo
+ * @date 18 febrero, 2025
+ */
 public class Client {
     private static final String SERVER_ADDRESS = "localhost";
     private static final int SERVER_PORT = 12345;
 
+    /**
+     * Método principal que maneja la comunicación con el servidor.
+     *
+     * @param args Argumentos de la línea de comandos.
+     */
     public static void main(String[] args) {
         try (Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
              DataInputStream dis = new DataInputStream(socket.getInputStream());
@@ -54,6 +61,12 @@ public class Client {
         }
     }
 
+    /**
+     * Método que lista los archivos disponibles en el servidor.
+     *
+     * @param dis El DataInputStream para leer datos del servidor.
+     * @throws IOException Si ocurre un error de entrada/salida.
+     */
     private static void listFiles(DataInputStream dis) throws IOException {
         int fileCount = dis.readInt();
         System.out.println("Archivos disponibles en el servidor:");
@@ -62,6 +75,13 @@ public class Client {
         }
     }
 
+    /**
+     * Método que envía un archivo al servidor.
+     *
+     * @param fileName El nombre del archivo a enviar.
+     * @param dos El DataOutputStream para enviar datos al servidor.
+     * @throws IOException Si ocurre un error de entrada/salida.
+     */
     private static void sendFile(String fileName, DataOutputStream dos) throws IOException {
         File file = new File(fileName);
 
@@ -80,6 +100,13 @@ public class Client {
         System.out.println("Archivo " + fileName + " enviado.");
     }
 
+    /**
+     * Método que recibe un archivo del servidor.
+     *
+     * @param fileName El nombre del archivo a recibir.
+     * @param dis El DataInputStream para leer datos del servidor.
+     * @throws IOException Si ocurre un error de entrada/salida.
+     */
     private static void receiveFile(String fileName, DataInputStream dis) throws IOException {
         String status = dis.readUTF();
         if (status.equals("FILE_NOT_FOUND")) {
