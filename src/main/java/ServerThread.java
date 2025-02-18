@@ -33,8 +33,10 @@ class ServerThread implements Runnable {
 
         try (DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
              DataOutputStream dos = new DataOutputStream(clientSocket.getOutputStream())) {
+            //Envia un mensaje de bienvenida al hiilo cliente, el cliente al iniciarse espera un mensaje del servidor, por lotanto sin esto el cliente no funcionaria
             dos.writeUTF("Bienvenido al servidor");
             while (true) {
+                //Espera a que el cliente de una instruccion
                 String command = dis.readUTF();
                 if (command.equals("UPLOAD")) {
                     receiveFile(dis);
@@ -54,6 +56,7 @@ class ServerThread implements Runnable {
             System.err.println("Error general: " + e.getMessage());
         } finally {
             try {
+                //Cierra el socket y se quita del contador
                 clientSocket.close();
                 clientCount.decrementAndGet();
                 System.out.println("Un cliente se ha desconectado, actualmente hay: " + clientCount.get() + " clientes conectados.");
@@ -70,16 +73,17 @@ class ServerThread implements Runnable {
      * @throws IOException Si ocurre un error de entrada/salida.
      */
     private void receiveFile(DataInputStream dis) throws IOException {
-
+        //Lee nombre y tamaño del archivo
         String fileName = dis.readUTF();
         long fileSize = dis.readLong();
         File file = new File("server_files/" + fileName);
         if (!file.exists()) {
-            file.getParentFile().mkdirs(); // Crear directorios si no existen
+            file.getParentFile().mkdirs(); //Crea directorios si no existen
         }
         try (FileOutputStream fos = new FileOutputStream(file)) {
             byte[] buffer = new byte[4096];
             int bytesRead;
+            //Lee y escribe el archivo en el servidor
             while (fileSize > 0 && (bytesRead = dis.read(buffer, 0, (int) Math.min(buffer.length, fileSize))) != -1) {
                 fos.write(buffer, 0, bytesRead);
                 fileSize -= bytesRead;
@@ -115,6 +119,7 @@ class ServerThread implements Runnable {
      * @throws IOException Si ocurre un error de entrada/salida.
      */
     private void sendFile(DataInputStream dis, DataOutputStream dos) throws IOException {
+        //Lee el nombre del archivo que quiere el usuario
         String fileName = dis.readUTF();
         File file = new File("./server_files/" + fileName);
         if (!file.exists()) {
@@ -126,6 +131,7 @@ class ServerThread implements Runnable {
         try (FileInputStream fis = new FileInputStream(file)) {
             byte[] buffer = new byte[4096];
             int bytesRead;
+            //Se lo envia por bytes el archivo al cliente
             while ((bytesRead = fis.read(buffer)) != -1) {
                 dos.write(buffer, 0, bytesRead);
             }

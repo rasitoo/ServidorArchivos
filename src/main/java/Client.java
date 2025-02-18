@@ -23,6 +23,7 @@ public class Client {
              DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
              BufferedReader console = new BufferedReader(new InputStreamReader(System.in))) {
 
+            //Al iniciarse espera un mensaje del sercidor, si el mensaje es que está lleno entonces para
             String serverMessage = dis.readUTF();
             if ("SERVER_FULL".equals(serverMessage)) {
                 System.out.println("El servidor está lleno. Inténtelo de nuevo más tarde.");
